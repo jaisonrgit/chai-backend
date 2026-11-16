@@ -55,8 +55,54 @@ const getAllVideos = asyncHandler(async (req, res) => {
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
-    const { title, description } = req.body
     // TODO: get video, upload to cloudinary, create video
+    const { title , description } = req.body
+    const trimString = (data) => data?.trimStart()?.trimEnd()?.trim()
+
+    //validate title and description
+    Object.entries({title,description}).some(([name,value]) => {
+        if(!trimString(value)) throw new ApiError(200,`${name} is not provided`)
+    })
+
+    const videoFile = req.files?.videoFile?.[0]
+    const thumbnail = req?.files?.thumbnail?.[0]
+
+    // validate video and image
+    Object.entries({videoFile,thumbnail})
+    .forEach(([name,obj])=>{
+        const mimetype = (name === "videoFile" ? "video" : "image")
+        if(!obj || !obj?.mimetype?.startsWith(mimetype)){
+            throw new ApiError(415,`${name} should be ${mimetype} format file`)
+        }
+    })
+    
+    const [videoUploadResult,thumbnailUploadResult] = await Promise.all([
+        uploadOnCloudinary(videoFile.path),
+        uploadOnCloudinary(thumbnail.path)
+    ])
+    
+    Object.entries({video : videoUploadResult,image : thumbnailUploadResult})
+    .forEach(([name,obj])=> {
+        if(!obj.url){
+            throw new ApiError(500,`Failed to upload ${name}`)
+        }
+    })
+    
+    const video = await Video.create({
+        videoFile : videoUploadResult.url,
+        thumbnail : thumbnailUploadResult.url,
+        owner : req.user?._id,
+        title,
+        description,
+        duration : videoUploadResult.duration
+    })
+
+    
+    return res
+    .status(201)
+    .json(
+        new ApiResponse(201,video,"video and thumbnail upload successfully")
+    )
 })
 
 const getVideoById = asyncHandler(async (req, res) => {
