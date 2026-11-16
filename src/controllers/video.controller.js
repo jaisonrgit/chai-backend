@@ -58,7 +58,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     // TODO: get video, upload to cloudinary, create video
     const { title , description } = req.body
     const trimString = (data) => data?.trimStart()?.trimEnd()?.trim()
-
+    console.log(req.files)
     //validate title and description
     Object.entries({title,description}).some(([name,value]) => {
         if(!trimString(value)) throw new ApiError(200,`${name} is not provided`)
