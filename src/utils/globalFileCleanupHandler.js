@@ -6,8 +6,8 @@ export default function globalFileCleanupHandler(err,req,res,next){
         fs.unlinkSync(req.file?.path)
     }
     else if(typeof req.files === "object"){
-        for (const [_,array] of Object.entries(req.files)) {
-            array.forEach(file => unlink(file.path),(error) => console.log({error}))
+        for(const [_,array] of Object.entries(req.files)) {
+            array.forEach(file => unlink(file.path,(error) => console.log({error})))
         }
 
     }
