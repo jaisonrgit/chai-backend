@@ -107,7 +107,61 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: get video by id
+    // const video = await Video.aggregate([
+    //     {
+    //         $match : {
+    //             _id : new mongoose.Types.ObjectId(videoId)
+    //         },
+
+    //     },
+
+    //     {
+
+    //         $lookup : {
+    //             from : "users",
+    //             localField : "owner",
+    //             foreignField : "_id",
+    //             as : "owner", 
+    //             pipeline : [
+    //                 {$project : {
+    //                     _id : 1,
+    //                     username : 1,
+    //                     avatar : 1
+    //                 }}
+    //             ]
+    //         }
+    //     },
+    //     {
+    //         $addFields : {
+    //             owner : {
+    //                 $arrayElemAt : ["$owner",0]
+    //             }
+    //         }
+    //     }
+    // ])
+
+    const video = await Video.findByIdAndUpdate(videoId,{
+        $inc : {
+            views : 1
+        }
+    },
+    {
+        new : true
+    }
+).populate("owner","_id username avatar")
+    console.log(video)
+    if(!video){
+        throw new ApiError(404,"Video not found!")
+    }
+    console.log(req.user.watchHistory)
+    const userWatchHistoryPromise = await User.findByIdAndUpdate(req.user._id,{
+        $push : {
+            watchHistory : video._id
+        }
+    })
+    
+
+    return res.status(200).json(new ApiResponse(200,video,"Video fetch successfully"))
 })
 
 const updateVideo = asyncHandler(async (req, res) => {
