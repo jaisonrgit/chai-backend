@@ -8,6 +8,23 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET 
 });
 
+const deleteFileOnCloudinary = async (url="",options = {resource_type : "image"}) => { // deletion without an error for user
+    if(!url.startsWith("http")){
+        return null
+    }
+    try {
+        console.log(url)
+        const publicId = url.split("/")?.[url.split("/").length - 1]?.split(".")?.[0]
+        console.log(publicId)
+        if(!publicId) return null
+
+        const result = await cloudinary.uploader.destroy(publicId,options)
+        console.log(result)
+    } catch (error) {
+        return null
+    }
+}
+
 const uploadOnCloudinary = async (localFilePath) => {
     try {
         if (!localFilePath) return null
@@ -28,4 +45,4 @@ const uploadOnCloudinary = async (localFilePath) => {
 
 
 
-export {uploadOnCloudinary}
+export {uploadOnCloudinary,deleteFileOnCloudinary}
