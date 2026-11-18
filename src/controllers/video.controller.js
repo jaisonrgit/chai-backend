@@ -10,7 +10,13 @@ import { deleteFileOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
-    const pipeline = []
+    const pipeline = [
+        {
+            $match : {
+                isPublished : true
+            }
+        }
+    ]
 
     if (userId?.trim()) {
         const matchUserIdStage = {
