@@ -7,10 +7,50 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 
 const createTweet = asyncHandler(async (req, res) => {
     //TODO: create tweet
+    const {content} = req.body
+
+    if(!content?.trim()){
+        throw new ApiError(400,"Content required")
+    }
+
+    const tweet = await Tweet.create({
+        content,
+        owner : req.user._id
+    })
+
+    if(!tweet){
+        throw new ApiError(500,"Something went wrong while creating tweet")
+    }
+
+    return res.status(201).json(new ApiResponse(201,tweet,"Tweet succesfully created"))
 })
 
 const getUserTweets = asyncHandler(async (req, res) => {
     // TODO: get user tweets
+    const {page = 1,limit = 10,query,sortType,userId} = req.query
+
+    const pipeline = [
+        {
+            $match : {
+                userId
+            }
+        },
+        {
+            $sort : sortType === "desc" ? -1 : 1
+        }
+    ]
+
+    if(query){
+        pipeline.push({
+            $match : {
+                content : {
+                    $regex : query , $options : "i"
+                }
+            }
+        })
+    }
+
+    Tweet.aggregate(pipeline)
 })
 
 const updateTweet = asyncHandler(async (req, res) => {
