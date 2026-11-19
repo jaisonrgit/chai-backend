@@ -3,7 +3,7 @@ import fs, { unlink } from "fs"
 // A global file cleanup method for unexpected crash or error in controller
 export default function globalFileCleanupHandler(err,req,res,next){
     if(req.file && req.file?.path){
-        fs.unlinkSync(req.file?.path)
+        fs.unlink(req.file?.path)
     }
     else if(typeof req.files === "object"){
         for(const [_,array] of Object.entries(req.files)) {
