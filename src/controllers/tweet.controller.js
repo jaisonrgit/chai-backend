@@ -48,7 +48,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
         })
     }
 
-    if (["createdAt", "updatedAt"].includes(sortBy?.trim()?.toLowerCase())) {
+    if (["createdat", "updatedat"].includes(sortBy?.trim()?.toLowerCase())) {
         const sortByQuery = {}
         sortByQuery[sortBy] = sortBy === "asc" ? 1 : -1
         pipeline.push(sortByQuery)
